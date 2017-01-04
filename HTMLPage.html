@@ -13,6 +13,7 @@
 		.rock{position:absolute; top:550px; left:500px;}
 		.bullet{position:absolute; top:300px; left:300px; width:20px; height:8px; border-top-right-radius: 5px; border-bottom-right-radius:5px; background-color:darkturquoise; border:solid 1px darkturquoise; border-top-left-radius: 1px; border-bottom-left-radius: 1px}
 		.destroyed{color:greenyellow; position:absolute;top:360px; left:490px;}
+		.friend-destroyed{color:red; position:absolute; top:750px; left:880px;}
 	</style>
 	<script>
 		var keyValue = {};
@@ -22,6 +23,7 @@
 		$(function(){
 			var socket = io.connect();
 			
+			//플레이어 움직임 처리
 			socket.on('rendering', function(data){
 				console.log(data);
 				if(data.playerCode === 0){
@@ -43,23 +45,61 @@
 				
 			})*/
 			
-			socket.on('anotherPlayer', function(data){
-				console.log(data + "가 입장하셨습니다.");
-			})
-
+			//player코드 설정
 			socket.on('player', function(data){
 				console.log("im " + data);
 				playerCode = data;
 			});
+			//타 플레이어 입장 알림
+			socket.on('anotherPlayer', function(data){
+				console.log(data + "가 입장하셨습니다.");
+			})
+
 			
+			//우주 암석
+			socket.on('rock', function(data){
+				var $rock = $(".rock").eq(data.sequence);
+				$rock.css("left", data.x + "px");
+				$rock.css("top", data.y + "px");
+			})
+			
+			
+			//충돌 처리
+			socket.on('collision', function(data){
+				var $destroyMessage;
+				if(parseInt(data.playerCode) === playerCode){
+					console.log("you are destroyed by rock");
+					$destroyMessage = $('<h1 class="destroyed">You are destroyed!</h1>');
+					$destroyMessage.appendTo($("#stage"));
+					setTimeout(function(){
+						$(".destroyed").first().remove();
+					}, 500);
+				}else{
+					console.log("player" + data.playerCode + " is destroyed by rock");
+					$destroyMessage = $('<h2 class="friend-destroyed">You\'re friend destroyed!</h2>');
+					$destroyMessage.appendTo($("#stage"));
+					setTimeout(function(){
+						$(".friend-destroyed").first().remove();
+					}, 700);
+				}
+			})
+			
+			
+			//윈도우 종료
+			window.onbeforeunload = function(){
+				socket.emit('browserOff', 'offff');
+			}
+			
+			//키 처리
 			$(document).on("keydown", function(e){
 				keyValue[e.keyCode] = 'on';
 			})
-			
 			$(document).on("keyup", function(e){
 				keyValue[e.keyCode] = undefined;
 			})
 			
+			//움직임 처리
+			var bulletGapTime = 0;
 			setInterval(function(){
 				var displacementLeft = 0;
 				var displacementTop = 0;
@@ -67,6 +107,7 @@
 				var $hero = $('#hero' + playerCode);
 				var direction = '';
 				var moveRange = 10;
+				
 				
 				if(keyValue[37]=='on' && parseInt($hero.css('left')) > 0){
 					displacementLeft -= moveRange;
@@ -91,30 +132,43 @@
 						'top': parseInt($hero.css("top")) + displacementTop,
 					});
 				}
+				
+				//총알 처리
+				bulletGapTime += 1;
+				if(bulletGapTime%20 === 0){
+					if(keyValue[32] =='on'){
+						console.log("space 클릭");
+						socket.emit('shot', {
+							playerCode: playerCode
+						});
+					}
+				}
 			}, 10);
 			
-			socket.on('rock', function(data){
-				var $rock = $(".rock").eq(data.sequence);
-				$rock.css("left", data.x + "px");
-				$rock.css("top", data.y + "px");
+			//총알 렌더링
+			socket.on('bulletMake', function(data){
+				$newBullet = $('<div class="bullet"></div>');
+				var $hero = $('#hero' + data.playerCode);
+				var heroX = parseInt($hero.css('left'));
+				var heroY = parseInt($hero.css('top'));
+				console.log(heroX);
+				$newBullet.css('left', (heroX+100)+'px');
+				$newBullet.css('top', (heroY+50) + 'px');
+				$newBullet.appendTo('#stage');
+			})
+			socket.on('bulletMove', function(data){
+				
 			})
 			
-			socket.on('collision', function(data){
-				if(parseInt(data.playerCode) === playerCode){
-					console.log("you are destroyed by rock");
-					$destroyMessage = $('<h1 class="destroyed">You are destroyed!</h1>');
-					$destroyMessage.appendTo($("body"));
-					setTimeout(function(){
-						$(".destroyed").first().remove();
-					}, 500);
-				}else{
-					console.log("player" + data.playerCode + " is destroyed by rock");
-				}
-			})
-			
-			window.onbeforeunload = function(){
-				socket.emit('browserOff', 'offff');
-			}
+			//총알 애니메이션
+			setInterval(function(){
+				$('.bullet').css("left", "+=15");
+				$('.bullet').each(function(item, index){
+					if(parseInt($(this).css('left')) > 1200){
+						$(this).remove();
+					}
+				})
+			}, 30)
 		})
 	</script>
 </head>
@@ -126,7 +180,7 @@
 		<img class="rock" src="/images/rock.png">
 		<img class="rock" src="/images/rock.png">
 		<img class="rock" src="/images/rock.png">
-		<div class="bullet"></div>
+		<!--<div class="bullet"></div>-->
 	</div>
 </body>
 </html>

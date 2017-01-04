@@ -50,7 +50,6 @@ io.sockets.on('connection', function(socket){
 	}
 	
 	socket.on('move', function(data){
-		console.log(data);
 		players[data.playerCode]._left = data.left;
 		players[data.playerCode]._top = data.top;
 		io.sockets.emit('rendering', data);
@@ -59,6 +58,11 @@ io.sockets.on('connection', function(socket){
 	socket.on('browserOff', function(data){
 		console.log(map.get(socket.id) + " is disconnected");
 		players[map.get(socket.id)] = undefined;
+	})
+	
+	socket.on('shot', function(data){
+		console.log(map.get(socket.id) + " shot");
+		io.sockets.emit('bulletMake', data);
 	})
 })
 

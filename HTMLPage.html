@@ -4,7 +4,7 @@
 	<script src="http://code.jquery.com/jquery-latest.js"></script>
 	<script src="/socket.io/socket.io.js"></script>
 	<style>
-		body{background-color:black;}
+		body{background-color:black; position:relative; }
 		*{padding:0px;margin:0px;}
 		#stage{position:relative; border: solid 4px #88ff63; margin:10px; border-radius:5px; width:1200px; height:800px; background-image: url("/images/star.jpg"); overflow:hidden; }
 		#hero0{position:absolute; top:100px; left:100px;}
@@ -12,6 +12,7 @@
 		#hero2{position:absolute; top:400px; left:100px;}
 		.rock{position:absolute; top:550px; left:500px;}
 		.bullet{position:absolute; top:300px; left:300px; width:20px; height:8px; border-top-right-radius: 5px; border-bottom-right-radius:5px; background-color:darkturquoise; border:solid 1px darkturquoise; border-top-left-radius: 1px; border-bottom-left-radius: 1px}
+		.destroyed{color:greenyellow; position:absolute;top:360px; left:490px;}
 	</style>
 	<script>
 		var keyValue = {};
@@ -96,6 +97,19 @@
 				var $rock = $(".rock").eq(data.sequence);
 				$rock.css("left", data.x + "px");
 				$rock.css("top", data.y + "px");
+			})
+			
+			socket.on('collision', function(data){
+				if(parseInt(data.playerCode) === playerCode){
+					console.log("you are destroyed by rock");
+					$destroyMessage = $('<h1 class="destroyed">You are destroyed!</h1>');
+					$destroyMessage.appendTo($("body"));
+					setTimeout(function(){
+						$(".destroyed").first().remove();
+					}, 500);
+				}else{
+					console.log("player" + data.playerCode + " is destroyed by rock");
+				}
 			})
 			
 			window.onbeforeunload = function(){

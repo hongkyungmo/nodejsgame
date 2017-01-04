@@ -28,6 +28,4 @@ function Rock(ioSocket){
 var initX = 1300;
 var initY = [100, 350, 530];
 
-Rock.prototype.start = 
-
 module.exports = Rock;

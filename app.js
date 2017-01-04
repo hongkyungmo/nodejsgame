@@ -8,13 +8,13 @@ var collision = require('./collision');
 
 var rocks = [];
 var players = [];
+var map = new Map();
 
 
 
 
 var app = express();
 app.use(express.static('public'));
-
 
 app.get('/', function(request, response, next){
 	fs.readFile('HTMLPage.html', function(err, data){
@@ -31,7 +31,7 @@ var io = socketio.listen(server, { log: false });
 
 io.sockets.on('connection', function(socket){
 	console.log("id : " + socket.id);
-	var map = new Map();
+	
 	if(players[0] === undefined){
 		players[0] = new player(100);
 		io.sockets.socket(socket.id).emit('player', 0);
@@ -80,7 +80,7 @@ setTimeout(function(){
 
 
 //충돌
-var collisionCheck = new collision();
+var collisionCheck = new collision(io.sockets);
 collisionCheck.playerAndRockCollision(players, rocks);
 
 //collision loop

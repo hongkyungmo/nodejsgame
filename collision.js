@@ -1,5 +1,5 @@
-function Collision(){
-	
+function Collision(ioSocket){
+	this.ioSocket = ioSocket;
 }
 Collision.prototype.playerAndRockCollision = function(players, rock){
 	console.log("collision check");
@@ -7,8 +7,6 @@ Collision.prototype.playerAndRockCollision = function(players, rock){
 	if(players[0] !== undefined){
 		console.log("players[0]._left : " + players[0]._left);
 	}
-	
-	
 	
 	for(var i in players){
 		if(players[i] === undefined){
@@ -20,6 +18,9 @@ Collision.prototype.playerAndRockCollision = function(players, rock){
 			   players[i]._top+100 >= rock[j]._top &&
 			   players[i]._top <= rock[j]._top+100){
 				console.log("p" + i + "와 " + j + "가 충돌!");
+				this.ioSocket.emit('collision', {
+					playerCode: i
+				})
 			}else{
 				console.log("p" + i + "와 " + j + "가 충돌 안 함!");
 			}

@@ -4,6 +4,7 @@ var socketio = require('socket.io');
 var fs = require('fs');
 var rock = require('./rock');
 var player = require('./player');
+var collision = require('./collision');
 
 var rocks = [];
 var players = [];
@@ -32,17 +33,17 @@ io.sockets.on('connection', function(socket){
 	console.log("id : " + socket.id);
 	var map = new Map();
 	if(players[0] === undefined){
-		players[0] = new player.Player(100);
+		players[0] = new player(100);
 		io.sockets.socket(socket.id).emit('player', 0);
 		socket.broadcast.emit('anotherPlayer', 0);
 		map.set(socket.id, 0);
 	}else if(players[1] === undefined){
-		players[1] = new player.Player(100);
+		players[1] = new player(100);
 		io.sockets.socket(socket.id).emit('player', 1);
 		socket.broadcast.emit('anotherPlayer', 1);
 		map.set(socket.id, 1);
 	}else{
-		players[2] = new player.Player(100);
+		players[2] = new player(100);
 		io.sockets.socket(socket.id).emit('player', 2);
 		socket.broadcast.emit('anotherPlayer', 2);
 		map.set(socket.id, 2);
@@ -50,6 +51,8 @@ io.sockets.on('connection', function(socket){
 	
 	socket.on('move', function(data){
 		console.log(data);
+		players[data.playerCode]._x = data.x;
+		players[data.playerCode]._y = data.y;
 		io.sockets.emit('rendering', data);
 	})
 	
@@ -64,7 +67,7 @@ io.sockets.on('connection', function(socket){
 
 
 for(var i=0;i<3;i++){
-	rocks[i] = new rock.Rock(io.sockets);
+	rocks[i] = new rock(io.sockets);
 }
 
 rocks[0].start(0, 33);

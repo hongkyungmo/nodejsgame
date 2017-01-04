@@ -4,4 +4,4 @@ function Player(hp){
 	this._y;
 }
 
-exports.Player = Player;
+module.exports = Player;

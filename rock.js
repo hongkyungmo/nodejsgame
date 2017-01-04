@@ -25,4 +25,4 @@ Rock.prototype.start = function(sequence, speed){
 	}, 100);
 }
 
-exports.Rock = Rock;
+module.exports = Rock;

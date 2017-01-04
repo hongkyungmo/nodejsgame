@@ -51,8 +51,8 @@ io.sockets.on('connection', function(socket){
 	
 	socket.on('move', function(data){
 		console.log(data);
-		players[data.playerCode]._x = data.x;
-		players[data.playerCode]._y = data.y;
+		players[data.playerCode]._left = data.left;
+		players[data.playerCode]._top = data.top;
 		io.sockets.emit('rendering', data);
 	})
 	
@@ -77,3 +77,13 @@ setTimeout(function(){
 setTimeout(function(){
 	rocks[2].start(2, 55)
 }, 1600);
+
+
+//충돌
+var collisionCheck = new collision();
+collisionCheck.playerAndRockCollision(players, rocks);
+
+//collision loop
+setInterval(function(){
+	collisionCheck.playerAndRockCollision(players, rocks);
+}, 100)

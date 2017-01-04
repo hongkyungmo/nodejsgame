@@ -1,7 +1,6 @@
-function Player(hp){
-	this._hp;
-	this._x;
-	this._y;
+function Player(){
+	this._left = 0;
+	this._top = 0;
 }
 
 module.exports = Player;

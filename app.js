@@ -3,15 +3,13 @@ var express = require('express');
 var socketio = require('socket.io');
 var fs = require('fs');
 var rock = require('./rock');
+var player = require('./player');
 
 var rocks = [];
-
-function Player(_hp){
-	this._hp;
-	this._x;
-	this._y;
-}
 var players = [];
+
+
+
 
 var app = express();
 app.use(express.static('public'));
@@ -34,17 +32,17 @@ io.sockets.on('connection', function(socket){
 	console.log("id : " + socket.id);
 	var map = new Map();
 	if(players[0] === undefined){
-		players[0] = new Player(100);
+		players[0] = new player.Player(100);
 		io.sockets.socket(socket.id).emit('player', 0);
 		socket.broadcast.emit('anotherPlayer', 0);
 		map.set(socket.id, 0);
 	}else if(players[1] === undefined){
-		players[1] = new Player(100);
+		players[1] = new player.Player(100);
 		io.sockets.socket(socket.id).emit('player', 1);
 		socket.broadcast.emit('anotherPlayer', 1);
 		map.set(socket.id, 1);
 	}else{
-		players[2] = new Player(100);
+		players[2] = new player.Player(100);
 		io.sockets.socket(socket.id).emit('player', 2);
 		socket.broadcast.emit('anotherPlayer', 2);
 		map.set(socket.id, 2);

@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<script src="http://code.jquery.com/jquery-latest.js"></script>
+	<script src="/socket.io/socket.io.js"></script>
+	<style>
+		body{background-color:black;}
+		*{padding:0px;margin:0px;}
+		#stage{position:relative; border: solid 4px #88ff63; margin:10px; border-radius:5px; width:1200px; height:800px; background-image: url("/images/star.jpg"); overflow:hidden; }
+		#hero0{position:absolute; top:100px; left:100px;}
+		#hero1{position:absolute; top:250px; left:100px;}
+		#hero2{position:absolute; top:400px; left:100px;}
+		.rock{position:absolute; top:550px; left:500px;}
+		.bullet{position:absolute; top:300px; left:300px; width:20px; height:8px; border-top-right-radius: 5px; border-bottom-right-radius:5px; background-color:darkturquoise; border:solid 1px darkturquoise; border-top-left-radius: 1px; border-bottom-left-radius: 1px}
+	</style>
+	<script>
+		var keyValue = {};
+		var playerCode;
+		var $user;
+		
+		$(function(){
+			var socket = io.connect();
+			
+			socket.on('rendering', function(data){
+				console.log(data);
+				if(data.playerCode === 0){
+					$user = $("#hero0");
+					console.log("hero0 move");
+				}else if(data.playerCode === 1){
+					$user = $("#hero1");
+					console.log("hero1 move");
+				}else if(data.playerCode === 2){
+					$user = $("#hero2")
+					console.log("hero2 move");
+				}
+				
+				$user.css("left", data.left + "px");
+				$user.css("top", data.top + "px");
+			});
+			
+			/*socket.on('bulletRendering', function(data){
+				
+			})*/
+			
+			socket.on('anotherPlayer', function(data){
+				console.log(data + "가 입장하셨습니다.");
+			})
+
+			socket.on('player', function(data){
+				console.log("im " + data);
+				playerCode = data;
+			});
+			
+			$(document).on("keydown", function(e){
+				keyValue[e.keyCode] = 'on';
+			})
+			
+			$(document).on("keyup", function(e){
+				keyValue[e.keyCode] = undefined;
+			})
+			
+			setInterval(function(){
+				var displacementLeft = 0;
+				var displacementTop = 0;
+				var keyOnFlag = false;
+				var $hero = $('#hero' + playerCode);
+				var direction = '';
+				var moveRange = 10;
+				
+				if(keyValue[37]=='on' && parseInt($hero.css('left')) > 0){
+					displacementLeft -= moveRange;
+					keyOnFlag = true;
+				}
+				if(keyValue[38]=='on' && parseInt($hero.css('top')) > 0){
+					displacementTop -= moveRange;
+					keyOnFlag = true;
+				}
+				if(keyValue[39]=='on' && parseInt($hero.css('left')) < 1100){
+					displacementLeft += moveRange;
+					keyOnFlag = true;
+				}
+				if(keyValue[40]=='on' && parseInt($hero.css('top')) < 700){
+					displacementTop += moveRange;
+					keyOnFlag = true;
+				}
+				if(keyOnFlag===true){
+					socket.emit('move', {
+						'playerCode': playerCode,
+						'left': parseInt($hero.css("left")) + displacementLeft,
+						'top': parseInt($hero.css("top")) + displacementTop,
+					});
+				}
+			}, 10);
+			
+			socket.on('rock', function(data){
+				var $rock = $(".rock").eq(data.sequence);
+				$rock.css("left", data.x + "px");
+				$rock.css("top", data.y + "px");
+			})
+			
+			window.onbeforeunload = function(){
+				socket.emit('browserOff', 'offff');
+			}
+		})
+	</script>
+</head>
+<body>
+	<div id="stage">
+		<img id="hero0" src="/images/airplane1.png">
+		<img id="hero1" src="/images/airplane2.png">
+		<img id="hero2" src="/images/airplane3.png">
+		<img class="rock" src="/images/rock.png">
+		<img class="rock" src="/images/rock.png">
+		<img class="rock" src="/images/rock.png">
+		<div class="bullet"></div>
+	</div>
+</body>
+</html>

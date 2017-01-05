@@ -14,6 +14,7 @@
 		.bullet{position:absolute; top:300px; left:300px; width:20px; height:8px; border-top-right-radius: 5px; border-bottom-right-radius:5px; background-color:darkturquoise; border:solid 1px darkturquoise; border-top-left-radius: 1px; border-bottom-left-radius: 1px}
 		.destroyed{color:greenyellow; position:absolute;top:360px; left:490px;}
 		.friend-destroyed{color:red; position:absolute; top:750px; left:880px;}
+		.explosion{position:absolute;}
 		#enemy-king{position:absolute; top:270px; left:880px;}
 	</style>
 	<script>
@@ -72,8 +73,19 @@
 					console.log("you are destroyed by rock");
 					$destroyMessage = $('<h1 class="destroyed">You are destroyed!</h1>');
 					$destroyMessage.appendTo($("#stage"));
+					
+					$explosion = $('<img class="explosion" src="/images/explosion.png">');
+					var $hero = $('#hero' + data.playerCode);
+					var heroX = parseInt($hero.css('left'));
+					var heroY = parseInt($hero.css('top'));
+					$explosion.css('left', (heroX+60)+'px');
+					$explosion.css('top', (heroY) + 'px');
+					
+					
+					$explosion.appendTo($("#stage"));
 					setTimeout(function(){
 						$(".destroyed").first().remove();
+						$(".explosion").first().remove();
 					}, 500);
 				}else{
 					console.log("player" + data.playerCode + " is destroyed by rock");
@@ -152,7 +164,6 @@
 				var $hero = $('#hero' + data.playerCode);
 				var heroX = parseInt($hero.css('left'));
 				var heroY = parseInt($hero.css('top'));
-				console.log(heroX);
 				$newBullet.css('left', (heroX+100)+'px');
 				$newBullet.css('top', (heroY+50) + 'px');
 				$newBullet.appendTo('#stage');

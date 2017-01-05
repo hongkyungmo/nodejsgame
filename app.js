@@ -30,8 +30,8 @@ server.listen(8888, function(){
 var io = socketio.listen(server, { log: false });
 
 io.sockets.on('connection', function(socket){
+	//접속
 	console.log("id : " + socket.id);
-	
 	if(players[0] === undefined){
 		players[0] = new player(100);
 		io.sockets.socket(socket.id).emit('player', 0);
@@ -49,17 +49,20 @@ io.sockets.on('connection', function(socket){
 		map.set(socket.id, 2);
 	}
 	
+	//접속종료
+	socket.on('browserOff', function(data){
+		console.log(map.get(socket.id) + " is disconnected");
+		players[map.get(socket.id)] = undefined;
+	})
+	
+	//이동
 	socket.on('move', function(data){
 		players[data.playerCode]._left = data.left;
 		players[data.playerCode]._top = data.top;
 		io.sockets.emit('rendering', data);
 	})
 	
-	socket.on('browserOff', function(data){
-		console.log(map.get(socket.id) + " is disconnected");
-		players[map.get(socket.id)] = undefined;
-	})
-	
+	//총알
 	socket.on('shot', function(data){
 		console.log(map.get(socket.id) + " shot");
 		io.sockets.emit('bulletMake', data);
